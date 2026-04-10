@@ -726,6 +726,33 @@ function resetQuiz() {
   current = 0; score = 0; answered = false;
   show('s-intro');
 }
+  function submitLead(name, email, score, level) {
+  fetch("https://hook.us2.make.com/hnygv9qh2a81sxili6r3wpm6ghkyr8o7", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      score: score,
+      level: level,
+      source: "tiktok_test"
+    })
+  })
+  .then(() => {
+    console.log("Lead enviado 🚀");
+    window.location.href = "https://ruta-360-fxcy.glide.page";
+  })
+  .catch(error => {
+    console.error("Error:", error);
+  });
+}
+  function getLevel(score) {
+  if (score <= 1) return "Básico";
+  if (score <= 3) return "Intermedio";
+  return "Avanzado";
+}
 </script>
 </body>
 </html>
