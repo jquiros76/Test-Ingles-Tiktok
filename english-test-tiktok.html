@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>English Test · TikTok Style</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:     #0A0A0F;
+  --card:   #13131A;
+  --borde:  #1E1E2E;
+  --p1:     #FF3D6B; /* rojo-rosa */
+  --p2:     #FF6B35; /* naranja */
+  --p3:     #FFD23F; /* amarillo */
+  --p4:     #06D6A0; /* verde */
+  --p5:     #4CC9F0; /* cyan */
+  --texto:  #F0F0F8;
+  --muted:  #6B6B8A;
+  --white:  #FFFFFF;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;min-height:100vh;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--texto);overflow-x:hidden}
+
+/* ── FONDO ANIMADO ── */
+.bg-blobs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;animation:float 8s ease-in-out infinite}
+.blob1{width:400px;height:400px;background:var(--p1);top:-100px;left:-100px;animation-delay:0s}
+.blob2{width:350px;height:350px;background:var(--p5);bottom:-80px;right:-80px;animation-delay:-3s}
+.blob3{width:300px;height:300px;background:var(--p3);top:40%;left:50%;transform:translate(-50%,-50%);animation-delay:-5s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+
+/* ── WRAPPER ── */
+.app{
+  position:relative;z-index:1;
+  max-width:480px;margin:0 auto;
+  min-height:100vh;display:flex;flex-direction:column;
+  padding:24px 16px 40px;
+}
+
+/* ── PANTALLA INTRO ── */
+.screen{display:none;flex-direction:column;flex:1}
+.screen.active{display:flex}
+
+.intro{align-items:center;justify-content:center;text-align:center;gap:0}
+.intro-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,61,107,.15);
+  border:1px solid rgba(255,61,107,.3);
+  color:var(--p1);font-size:12px;font-weight:600;
+  padding:6px 14px;border-radius:20px;
+  letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:24px;
+}
+.intro h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(36px,9vw,52px);
+  font-weight:800;line-height:1.05;
+  color:var(--white);margin-bottom:16px;
+}
+.intro h1 span{
+  background:linear-gradient(135deg,var(--p1),var(--p2),var(--p3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.intro p{font-size:16px;color:var(--muted);line-height:1.6;max-width:340px;margin-bottom:36px}
+.levels-row{display:flex;gap:8px;margin-bottom:36px;flex-wrap:wrap;justify-content:center}
+.lv{
+  padding:6px 14px;border-radius:20px;
+  font-size:12px;font-weight:600;
+  border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.5);
+}
+.lv.a{background:rgba(6,214,160,.1);border-color:rgba(6,214,160,.3);color:var(--p4)}
+.lv.b{background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.3);color:var(--p2)}
+.lv.c{background:rgba(255,61,107,.1);border-color:rgba(255,61,107,.3);color:var(--p1)}
+.btn-start{
+  font-family:'Syne',sans-serif;
+  font-size:18px;font-weight:800;
+  padding:18px 48px;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  color:#fff;border:none;border-radius:16px;cursor:pointer;
+  transition:all .2s;letter-spacing:.02em;
+  box-shadow:0 8px 32px rgba(255,61,107,.3);
+}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,61,107,.4)}
+.btn-start:active{transform:translateY(0)}
+
+/* ── BARRA PROGRESO SUPERIOR ── */
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:24px;
+}
+.prog-dots{display:flex;gap:6px}
+.dot{
+  width:32px;height:6px;border-radius:3px;
+  background:var(--borde);transition:all .3s;
+}
+.dot.done{background:var(--p4)}
+.dot.active{background:var(--p1);width:48px}
+.q-counter{
+  font-family:'Syne',sans-serif;
+  font-size:13px;font-weight:700;
+  color:var(--muted);letter-spacing:.06em;
+}
+.score-badge{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.2);
+  padding:4px 10px;border-radius:20px;
+  font-size:13px;font-weight:700;color:var(--p3);
+}
+
+/* ── TARJETA PREGUNTA ── */
+.q-card{
+  background:var(--card);
+  border:1px solid var(--borde);
+  border-radius:24px;
+  padding:28px 24px;
+  margin-bottom:20px;
+  position:relative;
+  overflow:hidden;
+  animation:slideUp .4s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.q-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--current-color,var(--p1)),transparent);
+}
+.q-level{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px;margin-bottom:14px;
+}
+.q-type-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;
+  color:var(--muted);margin-left:8px;
+}
+.q-text{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(18px,4.5vw,22px);
+  font-weight:700;color:var(--white);
+  line-height:1.35;margin-bottom:8px;
+}
+.q-sub{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:4px}
+
+/* ── AUDIO CARD ── */
+.audio-card{
+  background:rgba(76,201,240,.07);
+  border:1px solid rgba(76,201,240,.2);
+  border-radius:14px;padding:16px;
+  margin:12px 0 4px;
+  display:flex;align-items:center;gap:14px;
+}
+.audio-play-btn{
+  width:48px;height:48px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--p5),#3A86FF);
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  transition:all .2s;
+  box-shadow:0 4px 16px rgba(76,201,240,.3);
+}
+.audio-play-btn:hover{transform:scale(1.08)}
+.audio-play-btn.playing{animation:pulse-ring .8s ease-in-out infinite}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(76,201,240,.4)}50%{box-shadow:0 0 0 12px rgba(76,201,240,0)}}
+.audio-info{flex:1}
+.audio-title{font-size:13px;font-weight:700;color:var(--p5);margin-bottom:3px}
+.audio-text{
+  font-size:13px;color:var(--muted);line-height:1.4;
+  font-style:italic;
+}
+.audio-reveal{
+  font-size:13px;color:var(--texto);
+  background:rgba(76,201,240,.1);
+  border-radius:8px;padding:8px 10px;
+  margin-top:8px;display:none;
+  border-left:2px solid var(--p5);
+}
+.audio-reveal.show{display:block}
+
+/* ── OPCIONES ── */
+.options{display:flex;flex-direction:column;gap:10px}
+.opt{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  background:var(--card);
+  border:1.5px solid var(--borde);
+  border-radius:14px;cursor:pointer;
+  transition:all .18s;
+  font-size:15px;font-weight:500;color:var(--texto);
+  font-family:'DM Sans',sans-serif;
+  text-align:left;width:100%;
+  animation:slideUp .4s ease both;
+}
+.opt:nth-child(1){animation-delay:.05s}
+.opt:nth-child(2){animation-delay:.1s}
+.opt:nth-child(3){animation-delay:.15s}
+.opt:hover:not(:disabled){
+  border-color:rgba(255,255,255,.25);
+  background:rgba(255,255,255,.05);
+  transform:translateX(4px);
+}
+.opt:disabled{cursor:default}
+.opt-letter{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--borde);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+  color:var(--muted);flex-shrink:0;transition:all .18s;
+}
+.opt.correct{border-color:#06D6A0!important;background:rgba(6,214,160,.1)!important}
+.opt.correct .opt-letter{background:#06D6A0;color:#000}
+.opt.wrong{border-color:#FF3D6B!important;background:rgba(255,61,107,.08)!important}
+.opt.wrong .opt-letter{background:#FF3D6B;color:#fff}
+.opt.reveal{border-color:rgba(6,214,160,.4)!important;background:rgba(6,214,160,.05)!important}
+.opt.reveal .opt-letter{background:rgba(6,214,160,.3);color:#06D6A0}
+
+/* ── FEEDBACK ── */
+.feedback-card{
+  background:var(--card);border:1px solid var(--borde);
+  border-radius:16px;padding:16px 18px;
+  margin-top:14px;display:none;
+  animation:slideUp .3s ease;
+}
+.feedback-card.show{display:block}
+.fb-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.fb-emoji{font-size:22px}
+.fb-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800}
+.fb-title.ok{color:#06D6A0}
+.fb-title.err{color:#FF3D6B}
+.fb-text{font-size:14px;color:rgba(240,240,248,.7);line-height:1.6}
+.fb-text strong{color:var(--white)}
+
+/* ── BTN SIGUIENTE ── */
+.btn-next{
+  display:none;
+  font-family:'Syne',sans-serif;
+  font-size:16px;font-weight:800;
+  padding:16px 32px;
+  border:none;border-radius:14px;cursor:pointer;
+  color:#fff;width:100%;margin-top:16px;
+  transition:all .2s;letter-spacing:.02em;
+  animation:slideUp .3s ease;
+}
+.btn-next.show{display:block}
+.btn-next:hover{transform:translateY(-1px)}
+
+/* ── PANTALLA RESULTADO ── */
+.result-screen{align-items:center;justify-content:center;text-align:center;padding:20px 0}
+.result-ring{
+  width:160px;height:160px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto 28px;position:relative;
+}
+.result-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.result-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+.ring-bg{stroke:var(--borde)}
+.ring-fill{
+  stroke-dasharray:440;stroke-dashoffset:440;
+  transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1);
+}
+.result-pts{
+  font-family:'Syne',sans-serif;
+  font-size:52px;font-weight:800;color:var(--white);
+  line-height:1;
+}
+.result-total{font-size:16px;color:var(--muted);margin-top:2px}
+.result-emoji{font-size:52px;margin-bottom:12px}
+.result-title{
+  font-family:'Syne',sans-serif;
+  font-size:28px;font-weight:800;color:var(--white);
+  margin-bottom:10px;line-height:1.2;
+}
+.result-msg{font-size:15px;color:var(--muted);line-height:1.6;max-width:320px;margin:0 auto 28px}
+
+/* Tabla niveles */
+.levels-table{
+  width:100%;border-collapse:collapse;
+  margin-bottom:28px;
+  background:var(--card);
+  border:1px solid var(--borde);
+  border-radius:14px;overflow:hidden;
+}
+.levels-table th{
+  padding:10px 14px;text-align:left;
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);background:rgba(255,255,255,.03);
+  border-bottom:1px solid var(--borde);
+}
+.levels-table td{
+  padding:10px 14px;font-size:14px;
+  border-bottom:1px solid var(--borde);
+}
+.levels-table tr:last-child td{border-bottom:none}
+.levels-table tr.highlight td{background:rgba(255,61,107,.06)}
+.levels-table .stars{color:var(--p3)}
+.levels-table .range{font-family:'Syne',sans-serif;font-weight:800;color:var(--white)}
+.levels-table .tag{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:11px;font-weight:700;
+}
+
+.btn-retry{
+  font-family:'Syne',sans-serif;
+  font-size:16px;font-weight:800;
+  padding:16px 36px;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  color:#fff;border:none;border-radius:14px;cursor:pointer;
+  transition:all .2s;
+  box-shadow:0 8px 28px rgba(255,61,107,.3);
+}
+.btn-retry:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(255,61,107,.4)}
+
+/* Confetti */
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:100}
+.cf{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="bg-blobs">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<div class="app">
+
+  <!-- ══ INTRO ══ -->
+  <div class="screen intro active" id="s-intro">
+    <div class="intro-badge">🇺🇸 English Challenge</div>
+    <h1>¿Cuánto <span>inglés</span> sabes?</h1>
+    <p>5 preguntas que van de básico a avanzado. ¿Te atreves a descubrir tu nivel?</p>
+    <div class="levels-row">
+      <span class="lv a">🟢 Básico</span>
+      <span class="lv b">🟠 Intermedio</span>
+      <span class="lv c">🔴 Avanzado</span>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">¡Empezar! →</button>
+  </div>
+
+  <!-- ══ QUIZ ══ -->
+  <div class="screen" id="s-quiz">
+    <div class="top-bar">
+      <div class="prog-dots" id="prog-dots"></div>
+      <div class="q-counter" id="q-counter">1 / 5</div>
+      <div class="score-badge">⭐ <span id="live-score">0</span></div>
+    </div>
+    <div id="q-area"></div>
+  </div>
+
+  <!-- ══ RESULTADO ══ -->
+  <div class="screen result-screen" id="s-result">
+    <div class="result-emoji" id="res-emoji">🎉</div>
+    <div class="result-ring">
+      <svg viewBox="0 0 160 160" width="160" height="160">
+        <circle class="ring-bg" cx="80" cy="80" r="70"/>
+        <circle class="ring-fill" id="ring-fill" cx="80" cy="80" r="70" stroke="#FF3D6B"/>
+      </svg>
+      <div class="result-pts" id="res-pts">0</div>
+      <div class="result-total">de 5</div>
+    </div>
+    <div class="result-title" id="res-title">¡Bien hecho!</div>
+    <div class="result-msg" id="res-msg">Sigue practicando.</div>
+
+    <table class="levels-table" id="levels-table"></table>
+
+    <div class="confetti-wrap" id="confetti"></div>
+    <button class="btn-retry" onclick="resetQuiz()">🔄 Intentar de nuevo</button>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// PREGUNTAS
+// ══════════════════════════════════════════════════
+const QUIZ = [
+  {
+    level: "Básico · A1",
+    levelColor: "#06D6A0",
+    type: "grammar",
+    typeIcon: "📝",
+    question: "Complete the sentence:",
+    text: '"I ___ a student."',
+    sub: "Completa con la forma correcta del verbo TO BE.",
+    opts: ["am","is","are"],
+    correct: 0,
+    feedback: {
+      ok: "¡Perfecto! Con 'I' siempre usamos <strong>am</strong>. Es la primera regla del verbo TO BE.",
+      err: "La respuesta correcta es <strong>am</strong>. Recuerda: I AM, he/she/it IS, you/we/they ARE."
+    }
+  },
+  {
+    level: "Básico · A2",
+    levelColor: "#4CC9F0",
+    type: "vocabulary",
+    typeIcon: "💬",
+    question: "What does this mean?",
+    text: '"Could you repeat that, please?"',
+    sub: "¿Qué significa esta frase en español?",
+    opts: [
+      "¿Puedes hablar más rápido?",
+      "¿Puedes repetir eso, por favor?",
+      "¿Puedes escribir eso?"
+    ],
+    correct: 1,
+    feedback: {
+      ok: "¡Exacto! <strong>Could you repeat that?</strong> es la forma educada de pedir a alguien que repita lo que dijo.",
+      err: "La respuesta es B. <strong>Repeat</strong> = repetir. Es una frase muy útil para conversaciones reales."
+    }
+  },
+  {
+    level: "Intermedio · B1",
+    levelColor: "#FFD23F",
+    type: "audio",
+    typeIcon: "🎧",
+    question: "Listen and choose:",
+    text: "Press play and answer the question.",
+    sub: "¿Qué dice la persona en el audio?",
+    audioText: "Hi! I've been living in New York for three years, but I'm originally from Mexico.",
+    audioTranslation: "Hola, llevo tres años viviendo en Nueva York, pero soy originalmente de México.",
+    opts: [
+      "She lives in Mexico and visits New York.",
+      "She has lived in New York for three years.",
+      "She moved to New York last year."
+    ],
+    correct: 1,
+    feedback: {
+      ok: "¡Muy bien! <strong>I've been living</strong> (Present Perfect Continuous) indica que lleva 3 años viviendo ahí. <strong>For three years</strong> = durante tres años.",
+      err: "La respuesta es B. La frase <strong>'I've been living in New York for three years'</strong> significa que lleva 3 años viviendo allí — no que se mudó el año pasado."
+    }
+  },
+  {
+    level: "Intermedio · B2",
+    levelColor: "#FF6B35",
+    type: "grammar",
+    typeIcon: "📝",
+    question: "Choose the correct sentence:",
+    text: "¿Cuál es gramaticalmente correcta?",
+    sub: "Solo una de las tres frases es completamente correcta en inglés.",
+    opts: [
+      "If I would have more money, I buy a car.",
+      "If I had more money, I would buy a car.",
+      "If I have more money, I would bought a car."
+    ],
+    correct: 1,
+    feedback: {
+      ok: "¡Excelente! Esta es la <strong>Conditional Type 2</strong> (situación hipotética presente): <em>If + past simple → would + infinitive</em>. Significa 'Si tuviera dinero, compraría...' (pero no tengo).",
+      err: "La correcta es B. La regla del <strong>Second Conditional</strong> es: <em>If + past simple, would + verb</em>. La A usa 'would' mal en la condición, y la C mezcla tiempos."
+    }
+  },
+  {
+    level: "Avanzado · C1",
+    levelColor: "#FF3D6B",
+    type: "vocabulary",
+    typeIcon: "🔥",
+    question: "Advanced vocabulary:",
+    text: '"The politician\'s speech was full of <u>rhetoric</u> but lacked substance."',
+    sub: "¿Qué significa <strong>rhetoric</strong> en este contexto?",
+    opts: [
+      "Lenguaje elaborado y persuasivo, pero sin contenido real",
+      "Información técnica y datos comprobados",
+      "Errores gramaticales y mala pronunciación"
+    ],
+    correct: 0,
+    feedback: {
+      ok: "¡Impresionante! <strong>Rhetoric</strong> se refiere al uso elaborado del lenguaje para persuadir, especialmente cuando suena bien pero tiene poco contenido real. En política es muy común.",
+      err: "La respuesta es A. <strong>Rhetoric</strong> = retórica. Lenguaje diseñado para sonar convincente, pero que a veces carece de sustancia real. Es una palabra clave en debates y política."
+    }
+  }
+];
+
+// ══════════════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════════════
+let current = 0;
+let score   = 0;
+let answered = false;
+let synth    = window.speechSynthesis;
+let speaking = false;
+
+// ══════════════════════════════════════════════════
+// START
+// ══════════════════════════════════════════════════
+function startQuiz() {
+  current = 0; score = 0; answered = false;
+  show('s-quiz');
+  renderDots();
+  renderQuestion();
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════════════════════════
+// DOTS
+// ══════════════════════════════════════════════════
+function renderDots() {
+  const wrap = document.getElementById('prog-dots');
+  wrap.innerHTML = QUIZ.map((_, i) => `<div class="dot ${i < current ? 'done' : i === current ? 'active' : ''}" id="dot-${i}"></div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// RENDER PREGUNTA
+// ══════════════════════════════════════════════════
+function renderQuestion() {
+  answered = false;
+  document.getElementById('q-counter').textContent = `${current + 1} / ${QUIZ.length}`;
+  document.getElementById('live-score').textContent = score;
+  renderDots();
+
+  const q = QUIZ[current];
+  const area = document.getElementById('q-area');
+  const isAudio = q.type === 'audio';
+
+  area.innerHTML = `
+    <div class="q-card" style="--current-color:${q.levelColor}">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px">
+        <span class="q-level" style="background:${q.levelColor}22;border:1px solid ${q.levelColor}44;color:${q.levelColor}">
+          ${q.level}
+        </span>
+        <span class="q-type-tag">${q.typeIcon} ${q.type === 'audio' ? 'Escucha' : q.type === 'grammar' ? 'Gramática' : 'Vocabulario'}</span>
+      </div>
+      <div class="q-text">${q.question}</div>
+      <div class="q-sub">${q.sub}</div>
+      ${isAudio ? renderAudioBlock(q) : `<div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:700;color:${q.levelColor};margin:12px 0 4px;line-height:1.4">${q.text}</div>`}
+    </div>
+
+    <div class="options" id="opts">
+      ${q.opts.map((o, i) => `
+        <button class="opt" onclick="answer(${i})" id="opt-${i}">
+          <span class="opt-letter">${['A','B','C'][i]}</span>
+          ${o}
+        </button>`).join('')}
+    </div>
+
+    <div class="feedback-card" id="fb"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()"
+      style="background:linear-gradient(135deg,${q.levelColor},${q.levelColor}AA)">
+      ${current < QUIZ.length - 1 ? 'Siguiente →' : '¡Ver resultado! 🎯'}
+    </button>
+  `;
+}
+
+function renderAudioBlock(q) {
+  return `
+    <div class="audio-card">
+      <button class="audio-play-btn" id="play-btn" onclick="playAudio()" title="Escuchar">
+        ▶
+      </button>
+      <div class="audio-info">
+        <div class="audio-title">🎧 Escucha el audio</div>
+        <div class="audio-text">Presiona play para escuchar la frase en inglés</div>
+        <div class="audio-reveal" id="audio-reveal">
+          <strong>Audio dice:</strong> "${q.audioText}"<br>
+          <span style="color:var(--muted);font-size:12px">🇪🇸 ${q.audioTranslation}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════
+// AUDIO (Web Speech API)
+// ══════════════════════════════════════════════════
+function playAudio() {
+  const q = QUIZ[current];
+  if (!q.audioText) return;
+
+  const btn = document.getElementById('play-btn');
+  if (synth.speaking) { synth.cancel(); btn.classList.remove('playing'); btn.innerHTML = '▶'; speaking = false; return; }
+
+  const utt = new SpeechSynthesisUtterance(q.audioText);
+  utt.lang = 'en-US';
+  utt.rate = 0.88;
+  utt.pitch = 1;
+
+  // Intentar voz femenina en inglés
+  const voices = synth.getVoices();
+  const enVoice = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
+    || voices.find(v => v.lang.startsWith('en-US'))
+    || voices.find(v => v.lang.startsWith('en'));
+  if (enVoice) utt.voice = enVoice;
+
+  utt.onstart = () => { btn.classList.add('playing'); btn.innerHTML = '⏹'; speaking = true; };
+  utt.onend = () => { btn.classList.remove('playing'); btn.innerHTML = '▶'; speaking = false; };
+
+  synth.speak(utt);
+}
+
+// ══════════════════════════════════════════════════
+// RESPONDER
+// ══════════════════════════════════════════════════
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  if (synth.speaking) synth.cancel();
+
+  const q = QUIZ[current];
+  const isCorrect = idx === q.correct;
+  if (isCorrect) score++;
+
+  // Estilo opciones
+  document.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === idx && isCorrect) btn.classList.add('correct');
+    else if (i === idx && !isCorrect) btn.classList.add('wrong');
+    else if (i === q.correct && !isCorrect) btn.classList.add('reveal');
+  });
+
+  // Mostrar audio transcript si es audio
+  const rev = document.getElementById('audio-reveal');
+  if (rev) rev.classList.add('show');
+
+  // Feedback
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback-card show';
+  fb.innerHTML = `
+    <div class="fb-header">
+      <span class="fb-emoji">${isCorrect ? '✅' : '❌'}</span>
+      <span class="fb-title ${isCorrect ? 'ok' : 'err'}">${isCorrect ? '¡Correcto!' : 'Incorrecto'}</span>
+    </div>
+    <div class="fb-text">${isCorrect ? q.feedback.ok : q.feedback.err}</div>
+  `;
+
+  // Botón siguiente
+  const btn = document.getElementById('btn-next');
+  btn.classList.add('show');
+
+  // Actualizar score live
+  document.getElementById('live-score').textContent = score;
+}
+
+// ══════════════════════════════════════════════════
+// SIGUIENTE
+// ══════════════════════════════════════════════════
+function nextQuestion() {
+  if (synth.speaking) synth.cancel();
+  current++;
+  if (current >= QUIZ.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ══════════════════════════════════════════════════
+// RESULTADO
+// ══════════════════════════════════════════════════
+const LEVELS = [
+  { range: "0 – 1", tag: "Principiante", color: "#06D6A0", stars: "⭐", msg: "¡Estás empezando! Cada experto fue principiante una vez. Practica todos los días." },
+  { range: "2 – 3", tag: "Básico-Intermedio", color: "#4CC9F0", stars: "⭐⭐", msg: "¡Vas por buen camino! Ya manejas lo básico. Enfócate en el vocabulario." },
+  { range: "4", tag: "Intermedio", color: "#FFD23F", stars: "⭐⭐⭐", msg: "¡Muy bien! Tu inglés es sólido. Sigue con conversaciones reales." },
+  { range: "5", tag: "Avanzado", color: "#FF3D6B", stars: "⭐⭐⭐⭐", msg: "¡Impresionante! Tienes un nivel muy alto. ¿Ya hablas con nativos?" },
+];
+
+function showResult() {
+  show('s-result');
+
+  const pct = score / QUIZ.length;
+  const lIdx = score <= 1 ? 0 : score <= 3 ? 1 : score === 4 ? 2 : 3;
+  const lv = LEVELS[lIdx];
+
+  // Anillo
+  const circumference = 2 * Math.PI * 70;
+  const ring = document.getElementById('ring-fill');
+  ring.style.strokeDasharray = circumference;
+  ring.style.stroke = lv.color;
+  setTimeout(() => {
+    ring.style.strokeDashoffset = circumference * (1 - pct);
+  }, 100);
+
+  document.getElementById('res-pts').textContent = score;
+  document.getElementById('res-emoji').textContent = score === 5 ? '🏆' : score >= 4 ? '🎉' : score >= 2 ? '💪' : '📚';
+  document.getElementById('res-title').textContent = score === 5 ? '¡Eres un crack!' : score >= 4 ? '¡Muy bien!' : score >= 2 ? '¡Buen intento!' : '¡Sigue practicando!';
+  document.getElementById('res-msg').textContent = lv.msg;
+
+  // Tabla
+  document.getElementById('levels-table').innerHTML = `
+    <thead><tr><th>Puntos</th><th>Nivel</th><th></th></tr></thead>
+    <tbody>
+      ${LEVELS.map((l, i) => `
+        <tr ${i === lIdx ? 'class="highlight"' : ''}>
+          <td class="range">${l.range}</td>
+          <td><span class="tag" style="background:${l.color}22;color:${l.color}">${l.tag}</span></td>
+          <td class="stars">${l.stars}</td>
+        </tr>`).join('')}
+    </tbody>
+  `;
+
+  // Confetti si score alto
+  if (score >= 4) launchConfetti();
+}
+
+// ══════════════════════════════════════════════════
+// CONFETTI
+// ══════════════════════════════════════════════════
+function launchConfetti() {
+  const wrap = document.getElementById('confetti');
+  wrap.innerHTML = '';
+  const colors = ['#FF3D6B','#FF6B35','#FFD23F','#06D6A0','#4CC9F0','#fff'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'cf';
+    el.style.cssText = `
+      left:${Math.random()*100}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      width:${6+Math.random()*8}px;
+      height:${6+Math.random()*8}px;
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${Math.random()*.8}s;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    wrap.appendChild(el);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════════════
+function resetQuiz() {
+  if (synth.speaking) synth.cancel();
+  current = 0; score = 0; answered = false;
+  show('s-intro');
+}
+</script>
+</body>
+</html>
